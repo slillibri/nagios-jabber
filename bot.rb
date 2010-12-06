@@ -63,7 +63,7 @@ class Bot
         action ="[#{Time.now.strftime('%s')}] SCHEDULE_HOST_DOWNTIME;${host};#{Time.now.strftime('%s')};#{Time.now.strftime('%s').to_i + 3600};0;0;3600;#{msg.from.resource};'Scheduled over IM'"
         options = {:forhost => host, :action => action}
         foo = nagios.find_services(options)
-        send_msg(msg.from.to_s, foo, msg.type, msg.id)
+        send_msg(msg.from.to_s, "#{foo}", msg.type, msg.id)
     }
   end
   
@@ -74,4 +74,4 @@ class Bot
   end
 end
 
-#b = Bot.new(:botname =>  'bot@jabber.thereisnoarizona.org',:host =>  'jabber.thereisnoarizona.org',:password =>  'm0rph3us')
+#b = Bot.new(<tt>:botname =>  'bot@jabber.thereisnoarizona.org',:host =>  'jabber.thereisnoarizona.org',:password =>  'm0rph3us', :status_log => '/var/cache/nagios3/status.dat</tt>)
