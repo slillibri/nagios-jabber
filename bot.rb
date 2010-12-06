@@ -59,6 +59,7 @@ class Bot
     
     @client.add_message_callback {|msg|
         nagios.parsestatus(@status_log)
+        host = msg.body
         action ="[#{Time.now.strftime('%s')}] SCHEDULE_HOST_DOWNTIME;${host};#{Time.now.strftime('%s')};#{Time.now.strftime('%s').to_i + 3600};0;0;3600;#{msg.from.resource};'Scheduled over IM'"
         options = {:forhost => host, :action => action}
         foo = nagios.find_services(options)
