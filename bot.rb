@@ -9,7 +9,7 @@ require 'nagios/status.rb'
 class Bot
   include Jabber
   
-  attr_accessor :channel, :botname, :password, :host, :roster, :client, :status_log, :nagios
+  attr_accessor :channel, :botname, :password, :host, :roster, :client, :status_log, :nagios, :cmd_file
   
   def initialize args = Hash.new
     conf = args
@@ -58,15 +58,20 @@ class Bot
     end
     
     @client.add_message_callback {|msg|
+      if msg.body == 'roster'
+        reply = @roster.items.keys.join("\n")
+        send_msg(msg.from.to_s, "#{reply}", msg.type, msg.id)
+      else
         nagios.parsestatus(@status_log)
         host = msg.body
-        action ="[#{Time.now.strftime('%s')}] SCHEDULE_HOST_DOWNTIME;${host};#{Time.now.strftime('%s')};#{Time.now.strftime('%s').to_i + 3600};0;0;3600;#{msg.from.resource};'Scheduled over IM'"
+        action ="[#{Time.now.strftime('%s')}] SCHEDULE_HOST_DOWNTIME;${host};#{Time.now.strftime('%s')};#{Time.now.strftime('%s').to_i + 3600};0;0;3600;#{msg.from.to_s};'Scheduled over IM'"
         options = {:forhost => host, :action => action}
         foo = nagios.find_services(options)
-        File.open('/var/lib/nagios3/rw/nagios.cmd', 'w') do |f|
+        File.open(@cmd_file, 'w') do |f|
           f.puts foo
         end
         send_msg(msg.from.to_s, "#{foo}", msg.type, msg.id)        
+      end
     }
   end
   
@@ -77,4 +82,4 @@ class Bot
   end
 end
 
-#b = Bot.new(<tt>:botname =>  'bot@jabber.thereisnoarizona.org',:host =>  'jabber.thereisnoarizona.org',:password =>  'm0rph3us', :status_log => '/var/cache/nagios3/status.dat</tt>)
+#b = Bot.new(:botname =>  'bot@jabber.thereisnoarizona.org',:host =>  'jabber.thereisnoarizona.org',:password =>  'm0rph3us', :status_log => '/var/cache/nagios3/status.dat', :cmd_file => '/var/lib/nagios3/rw/nagios.cmd')
