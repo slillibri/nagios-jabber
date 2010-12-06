@@ -63,7 +63,10 @@ class Bot
         action ="[#{Time.now.strftime('%s')}] SCHEDULE_HOST_DOWNTIME;${host};#{Time.now.strftime('%s')};#{Time.now.strftime('%s').to_i + 3600};0;0;3600;#{msg.from.resource};'Scheduled over IM'"
         options = {:forhost => host, :action => action}
         foo = nagios.find_services(options)
-        send_msg(msg.from.to_s, "#{foo}", msg.type, msg.id)
+        File.open('/var/lib/nagios3/rw/nagios.cmd', 'w') do |f|
+          f.puts foo
+        end
+        send_msg(msg.from.to_s, "#{foo}", msg.type, msg.id)        
     }
   end
   
