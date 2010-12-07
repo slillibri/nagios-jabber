@@ -1,0 +1,15 @@
+This is just a simple experiment integrating the ruby-nagios library with an XMPP bot. 
+
+Currently, there are only 3 commands built in, SCHEDULE_HOST_DOWNTIME and SCHEDULE_HOST_SVC_DOWNTIME, called as host_downtime and service_downtime respectivly. Right now it will schedule a fixed 60 minute downtime, setting this as an option is planned.
+
+The message format for host_downtime is simply 'host_downtime,hostname'. Similarly, the service_downtime format is 'service_downtime,hostname,servicename'.
+
+To setup the bot, you can call Bot.new(:config => 'path to config file'). The config file is just a yamlized hash.
+
+:botname => The XMPP username of the bot, including domain.
+:host =>  the XMPP server
+:password => The XMPP users password
+:status_log => Path to Nagios' status file
+:cmd_file => Path to the Nagios command file
+
+Alternativly, these can be passed directly to the Bot.new command, bypassing the config file.
