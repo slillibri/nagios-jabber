@@ -109,7 +109,7 @@ class Bot
       nagios.parsestatus(@status_log)
       start = Time.now.strftime('%s')
       dend  = start.to_i + 3600
-      action = "[#{start}] #{action};#{options};#{start};#{dend};3600;#{from};'Scheduled over IM by #{from}'"
+      action = "[#{start}] #{action};#{options};#{start};#{dend};0;0;3600;#{from};'Scheduled over IM by #{from}'"
       reply = nagios.find_services(:forhost => host, :action => action)
       return reply
     rescue
