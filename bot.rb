@@ -65,14 +65,9 @@ class Bot
           send_msg(msg.from.to_s, "#{reply}", msg.type, msg.id)
         when 'host_downtime' then
           begin
-            nagios.parsestatus(@status_log)
-            start = Time.now.strftime('%s')
-            dend = start.to_i + 3600
-            action ="[#{start}] SCHEDULE_HOST_DOWNTIME;#{host};#{start};#{dend};0;0;3600;#{msg.from.to_s};'Scheduled over IM by #{msg.from.to_s}'"
-            options = {:forhost => host, :action => action}
-            foo = nagios.find_services(options)
+            action = build_action('SCHEDULE_HOST_DOWNTIME', host, msg.from.to_s, host)
             File.open(@cmd_file, 'w') do |f|
-              f.puts foo
+              f.puts action
             end
             send_msg(msg.from.to_s, "Scheduled downtome for #{host} for 1 hour", msg.type, msg.id)        
           rescue Exception => e
@@ -81,13 +76,9 @@ class Bot
           
         when 'service_downtime' then
           begin
-            nagios.parsestatus(@status_log)
-            start = Time.now.strftime('%s')
-            dend = start.to_i + 3600
-            action = "[#{start}] SCHEDULE_HOST_SVC_DOWNTIME;#{host};#{service};#{start};#{dend};3600;#{msg.from.to_s};'Scheduled over IM by #{msg.from.to_s}"
-            foo = nagios.find_services(:forhost => host, :action => action)
+            action = build_action('SCHEDULE_HOST_SVC_DOWNTIME', "#{host};#{service}", msg.from.to_s, host)
             File.open(@cmd_file, 'w') do |f|
-              f.puts foo
+              f.puts action
             end
             send_msg(msg.from.to_s, "Scheduled downtime for #{service} on #{host} for 1 hour", msg.type, msg.id)
           rescue Exception => e
@@ -95,6 +86,19 @@ class Bot
           end
       end
     }
+  end
+  
+  def build_action(action, options, from, host)
+    begin
+      nagios.parsestatus(@status_log)
+      start = Time.now.strftime('%s')
+      dend  = start.to_i + 3600
+      action = "[#{start}] #{action};#{options};#{start};#{dend};3600;#{from};'Scheduled over IM by #{from}'"
+      reply = nagios.find_services(:forhost => host, :action => action)
+      return reply
+    rescue
+      throw Exception.new('Unable to build action')
+    end
   end
   
   def run
