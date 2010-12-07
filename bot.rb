@@ -5,11 +5,12 @@ require 'eventmachine'
 require 'xmpp4r'
 require 'xmpp4r/roster'
 require 'nagios/status.rb'
+require 'log4r'
 
 class Bot
   include Jabber
   
-  attr_accessor :channel, :botname, :password, :host, :roster, :client, :status_log, :nagios, :cmd_file
+  attr_accessor :channel, :botname, :password, :host, :roster, :client, :status_log, :nagios, :cmd_file, :logger
   
   def initialize args = Hash.new
     conf = args
@@ -23,6 +24,19 @@ class Bot
         self.send("#{attr}=", value)
       end
     end
+    
+    loggertype = self.class.to_s.downcase
+    @logger = Log4r::Logger.new("#{loggertype}")
+    @logger.trace = true
+    o = Log4r::FileOutputter.new("#{loggertype}", :filename => "#{conf[:logfile]}", :trunc => false)
+    o.formatter = Log4r::BasicFormatter
+    @logger.outputters = o
+    @logger.level = conf[:loglevel] || DEBUG
+    if (@debug == true)
+      Jabber.debug = true
+      self.send(:require, 'pp')
+    end
+    @logger.debug("Initialization complete")      
     
     @nagios = Nagios::Status.new
   end
@@ -66,6 +80,7 @@ class Bot
         when 'host_downtime' then
           begin
             action = build_action('SCHEDULE_HOST_DOWNTIME', host, msg.from.to_s, host)
+            @logger.debug("Performing action: #{action}")
             File.open(@cmd_file, 'w') do |f|
               f.puts action
             end
@@ -76,7 +91,8 @@ class Bot
           
         when 'service_downtime' then
           begin
-            action = build_action('SCHEDULE_HOST_SVC_DOWNTIME', "#{host};#{service}", msg.from.to_s, host)
+            action = build_action('SCHEDULE_SVC_DOWNTIME', "#{host};#{service}", msg.from.to_s, host)
+            @logger.debug("Performing action: #{action}")
             File.open(@cmd_file, 'w') do |f|
               f.puts action
             end
