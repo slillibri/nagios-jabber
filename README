@@ -4,6 +4,8 @@ Currently, there are only 3 commands built in, SCHEDULE_HOST_DOWNTIME and SCHEDU
 
 The message format for host_downtime is simply 'host_downtime,hostname'. Similarly, the service_downtime format is 'service_downtime,hostname,servicename'.
 
+A third command, 'roster', will return the bot's XMPP roster.
+
 To setup the bot, you can call Bot.new(:config => 'path to config file'). The config file is just a yamlized hash.
 
 :botname => The XMPP username of the bot, including domain.
