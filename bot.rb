@@ -58,7 +58,7 @@ class Bot
     end
     
     @client.add_message_callback {|msg|
-      command,host,service = msg.body.split(/\n/)
+      command,host,service = msg.body.split(/,/)
       case command
         when 'roster' then 
           reply = @roster.items.keys.join("\n")
