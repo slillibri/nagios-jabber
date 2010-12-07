@@ -58,19 +58,41 @@ class Bot
     end
     
     @client.add_message_callback {|msg|
-      if msg.body == 'roster'
-        reply = @roster.items.keys.join("\n")
-        send_msg(msg.from.to_s, "#{reply}", msg.type, msg.id)
-      else
-        nagios.parsestatus(@status_log)
-        host = msg.body
-        action ="[#{Time.now.strftime('%s')}] SCHEDULE_HOST_DOWNTIME;${host};#{Time.now.strftime('%s')};#{Time.now.strftime('%s').to_i + 3600};0;0;3600;#{msg.from.to_s};'Scheduled over IM'"
-        options = {:forhost => host, :action => action}
-        foo = nagios.find_services(options)
-        File.open(@cmd_file, 'w') do |f|
-          f.puts foo
-        end
-        send_msg(msg.from.to_s, "#{foo}", msg.type, msg.id)        
+      command,host,service = msg.body.split(/\n/)
+      case command
+        when 'roster' then 
+          reply = @roster.items.keys.join("\n")
+          send_msg(msg.from.to_s, "#{reply}", msg.type, msg.id)
+        when 'host_downtime' then
+          begin
+            nagios.parsestatus(@status_log)
+            start = Time.strftime('%s')
+            dend = Time.strftime('%s').to_i + 3600
+            action ="[#{start}] SCHEDULE_HOST_DOWNTIME;#{host};#{start};#{dend};0;0;3600;#{msg.from.to_s};'Scheduled over IM by #{msg.from.to_s}'"
+            options = {:forhost => host, :action => action}
+            foo = nagios.find_services(options)
+            File.open(@cmd_file, 'w') do |f|
+              f.puts foo
+            end
+            send_msg(msg.from.to_s, "Scheduled downtome for #{host} for 1 hour", msg.type, msg.id)        
+          rescue Exception => e
+            send_msg(msg.from.to_s, "#{e.message}", msg.type, msg.id)
+          end
+          
+        when 'service_downtime' then
+          begin
+            nagios.parsestatus(@status_log)
+            start = Time.strftime('%s')
+            dend = Time.strftime('%s').to_i + 3600
+            action = "[#{start}] SCHEDULE_HOST_SVC_DOWNTIME;#{host};#{service};#{start};#{dend};3600;#{msg.from.to_s};'Scheduled over IM by #{msg.from.to_s}"
+            foo = nagios.find_services(:forhost => host, :action => action)
+            File.open(@cmd_file, 'w') do |f|
+              f.puts foo
+            end
+            send_msg(msg.from.to_s, "Scheduled downtime for #{service} on #{host} for 1 hour", msg.type, msg.id)
+          rescue Exception => e
+            send_msg(msg.from.to_s, "#{e.message}", msg.type, msg.id)
+          end
       end
     }
   end
