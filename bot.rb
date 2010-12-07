@@ -66,8 +66,8 @@ class Bot
         when 'host_downtime' then
           begin
             nagios.parsestatus(@status_log)
-            start = Time.strftime('%s')
-            dend = Time.strftime('%s').to_i + 3600
+            start = Time.now.strftime('%s')
+            dend = start.to_i + 3600
             action ="[#{start}] SCHEDULE_HOST_DOWNTIME;#{host};#{start};#{dend};0;0;3600;#{msg.from.to_s};'Scheduled over IM by #{msg.from.to_s}'"
             options = {:forhost => host, :action => action}
             foo = nagios.find_services(options)
@@ -82,8 +82,8 @@ class Bot
         when 'service_downtime' then
           begin
             nagios.parsestatus(@status_log)
-            start = Time.strftime('%s')
-            dend = Time.strftime('%s').to_i + 3600
+            start = Time.now.strftime('%s')
+            dend = start.to_i + 3600
             action = "[#{start}] SCHEDULE_HOST_SVC_DOWNTIME;#{host};#{service};#{start};#{dend};3600;#{msg.from.to_s};'Scheduled over IM by #{msg.from.to_s}"
             foo = nagios.find_services(:forhost => host, :action => action)
             File.open(@cmd_file, 'w') do |f|
