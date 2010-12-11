@@ -69,7 +69,7 @@ class Bot
             File.open(@cmd_file, 'w') do |f|
               f.puts action
             end
-            send_msg(msg.from.to_s, "Scheduled downtome for #{host} for 1 hour", msg.type, msg.id)        
+            send_msg(msg.from.to_s, "Scheduled downtime for #{host} for 1 hour", msg.type, msg.id)        
           rescue Exception => e
             send_msg(msg.from.to_s, "#{e.message}", msg.type, msg.id)
           end
@@ -84,6 +84,19 @@ class Bot
           rescue Exception => e
             send_msg(msg.from.to_s, "#{e.message}", msg.type, msg.id)
           end
+        when 'ack_host' then
+          begin
+            nagios.parsestatus(@status_log)
+            start = Time.now.strftime('%s')
+            action = "[#{start}] ACKNOWLEDGE_HOST_PROBLEM;#{host};1;1;1;#{msg.from.to_s};'#{host} acknowledged by #{msg.from.to_s}"
+            File.open(@cmd_file, 'w') do |f|
+              f.puts action
+            end
+            send_msg(msg.from.to_s, "Host (#{host}) acknowledged", msg.type, msg.id)
+          rescue Exception => e
+            send_msg(msg.from.to_s, "#{e.message}", msg.type, msg.id)
+          end
+          
       end
     }
   end
