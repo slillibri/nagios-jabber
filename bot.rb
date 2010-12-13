@@ -112,6 +112,22 @@ class Bot
           rescue Exception => e
             send_msg(msg.from.to_s, "#{e.message}", msg.type, msg.id)            
           end
+        when 'del_service_downtime' then
+          begin
+            nagios.parsestatus(@status_log)
+            status = nagios.status
+            reply = ''
+            start = Time.now.strftime('%s')
+            downtime_id = status[host]['servicedowntime'][service]
+            action = "[#{start}] DEL_SVC_DOWNTIME;#{downtime_id}"
+            File.open(@cmd_file, 'w') do |f|
+              f.puts action
+            end
+            send_msg(msg.from.to_s, "Canceled Downtime for #{host} - #{service}", msg.type, msg.id)
+          rescue Exception => e
+            send_msg(msg.from.to_s, "#{e.message}", msg.type, msg.id)
+          end
+          
       end
     }
   end
