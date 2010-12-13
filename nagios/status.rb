@@ -238,6 +238,13 @@ module Nagios
         def handle_hostcomment(lines)
         end
         
+        ## Parse servicedowntime
+        def handle_servicedowntime(lines)
+        end
+        
+        def handle_hostdowntime(lines)
+        end
+        
         # Parses a programstatus block
         def handle_programstatus(lines)
             @status["process"] = {} unless @status["process"]
