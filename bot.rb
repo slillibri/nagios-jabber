@@ -96,7 +96,22 @@ class Bot
           rescue Exception => e
             send_msg(msg.from.to_s, "#{e.message}", msg.type, msg.id)
           end
-          
+        when 'services_down' then
+          begin
+            nagios.parsestatus(@status_log)
+            msg = ''
+            status = nagios.status
+            status['hosts'].each do |host,statusblock|
+              if statusblock.key?('servicedowntime')
+                statusblock['servicedowntime'].keys.each do |service|
+                  msg = msg + "#{host} #{service} is down\n"
+                end
+              end
+            end
+            send_msg(msg.from.to_s, "#{msg}", msg.type, msg.id)
+          rescue Exception => e
+            send_msg(msg.from.to_s, "#{e.message}", msg.type, msg.id)            
+          end
       end
     }
   end
