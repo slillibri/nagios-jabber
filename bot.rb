@@ -131,6 +131,7 @@ class Bot
          when 'del_host_downtime' then
            begin
             nagios.parsestatus(@status_log)
+            status = nagios.status
             start = Time.now.strftime('%s')
             downtime_id = status['hosts'][host]['hostdowntime']
             action = "[#{start}] DEL_HOST_DOWNTIME;#{downtime_id}"
