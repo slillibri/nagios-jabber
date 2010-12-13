@@ -57,6 +57,7 @@ class Bot
       puts e.backtrace.join("\n")
     end
     
+    ##TODO Make all this better.
     @client.add_message_callback {|msg|
       command,host,service = msg.body.split(/,/)
       case command
@@ -127,7 +128,22 @@ class Bot
           rescue Exception => e
             send_msg(msg.from.to_s, "#{e.message}", msg.type, msg.id)
           end
-          
+         when 'del_host_downtime' then
+           begin
+            nagios.parsestatus(@status_log)
+            start = Time.now.strftime('%s')
+            downtime_id = status['hosts'][host]['hostdowntime']
+            action = "[#{start}] DEL_HOST_DOWNTIME;#{downtime_id}"
+            File.open(@cmd_file, 'w') do |f|
+              f.puts action              
+            end
+            send_msg(msg.from.to_s, "Canceled Downtime for #{host}", msg.type, msg.id)
+           rescue Exception => e
+            send_msg(msg.from.to_s, "#{e.message}", msg.type, msg.id)
+           end
+          when 'commands' then
+            reply = "roster, host_downtime, service_downtime, del_host_downtime, del_svc_downtime, commands"
+            send_msg(msg.from.to_s, "#{reply}", msg.type, msg.id)
       end
     }
   end
@@ -152,3 +168,14 @@ class Bot
   end
 end
 
+orig_stdout = $stdout
+$stdout = File.new('/dev/null', 'w')
+pid = fork do
+  b = Bot.new(:botname =>  'bot@jabber.thereisnoarizona.org',:host =>  'jabber.thereisnoarizona.org',:password =>  'j4bb3rb0t!', :status_log => '/var/cache/nagios3/status.dat', :cmd_file => '/var/lib/nagios3/rw/nagios.cmd')
+  b.run
+end
+::Process.detach pid
+$stdout = orig_stdout
+File.open('/var/run/nagios-jabber.pid', 'w') do |f|
+  f.puts pid
+end
