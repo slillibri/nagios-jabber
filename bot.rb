@@ -99,16 +99,16 @@ class Bot
         when 'services_down' then
           begin
             nagios.parsestatus(@status_log)
-            msg = ''
+            reply = ''
             status = nagios.status
             status['hosts'].each do |host,statusblock|
               if statusblock.key?('servicedowntime')
                 statusblock['servicedowntime'].keys.each do |service|
-                  msg = msg + "#{host} #{service} is down\n"
+                  reply = reply + "#{host} #{service} is down\n"
                 end
               end
             end
-            send_msg(msg.from.to_s, "#{msg}", msg.type, msg.id)
+            send_msg(msg.from.to_s, "#{reply}", msg.type, msg.id)
           rescue Exception => e
             send_msg(msg.from.to_s, "#{e.message}", msg.type, msg.id)            
           end
@@ -139,7 +139,7 @@ end
 orig_stdout = $stdout
 $stdout = File.new('/dev/null', 'w')
 pid = fork do
-  b = Bot.new(:botname =>  'bot@jabber.thereisnoarizona.org',:host =>  'jabber.thereisnoarizona.org',:password =>  'j4bb3rb0t!', :status_log => '/var/cache/nagios3/status.dat', :cmd_file => '/var/lib/nagios3/rw/nagios.cmd')
+    
   b.run
 end
 ::Process.detach pid
