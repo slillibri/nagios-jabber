@@ -118,7 +118,7 @@ class Bot
             status = nagios.status
             reply = ''
             start = Time.now.strftime('%s')
-            downtime_id = status[host]['servicedowntime'][service]
+            downtime_id = status['hosts'][host]['servicedowntime'][service]
             action = "[#{start}] DEL_SVC_DOWNTIME;#{downtime_id}"
             File.open(@cmd_file, 'w') do |f|
               f.puts action
