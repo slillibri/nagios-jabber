@@ -1,5 +1,5 @@
 --- 
-:botname: bot@jabber.thereisnoarizona.org
-:host: jabber.thereisnoarizona.org
+:botname: bot@jabber.example.com
+:host: jabber.example.com
 :logfile: test.log
-:password: j4bb3rb0t!
+:password: example
