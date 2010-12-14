@@ -164,7 +164,7 @@ class Bot
           when 'hostcomments' then
             nagios.parsestatus(@status_log)
             status = nagios.status
-            if status['hosts'][host]['hostcomments']
+            if status['hosts'][host].key('hostcomments')
               comments = status['hosts'][host]['hostcomments'].join("\n")
               reply = "#{host} has the following comments\n#{comments}"
               send_msg(msg.from.to_s, "#{reply}", msg.type, msg.id)
@@ -176,7 +176,7 @@ class Bot
           when 'servicecomments' then
             nagios.parsestatus(@status_log)
             status = nagios.status
-            if status['hosts'][host]['servicecomments'][service]
+            if status['hosts'][host].key('servicecomments') && status['hosts'][host]['servicecomments'].key(service)
               comments = status['hosts'][host]['servicecomments'][service].join("\n")
               reply = "#{service} on #{host} has the following comments\n#{comments}"
               send_msg(msg.from.to_s, "#{reply}", msg.type, msg.id)
