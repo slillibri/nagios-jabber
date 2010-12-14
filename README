@@ -1,10 +1,16 @@
 This is just a simple experiment integrating the ruby-nagios library with an XMPP bot. 
 
-Currently, there are only 3 commands built in, SCHEDULE_HOST_DOWNTIME and SCHEDULE_HOST_SVC_DOWNTIME, called as host_downtime and service_downtime respectivly. Right now it will schedule a fixed 60 minute downtime, setting this as an option is planned.
+This bot implements the following commands
 
-The message format for host_downtime is simply 'host_downtime,hostname'. Similarly, the service_downtime format is 'service_downtime,hostname,servicename'.
-
-A third command, 'roster', will return the bot's XMPP roster.
+    'roster' : Return the bot's current roster
+    'host_downtime' : Schedule downtime for 1 hour for host
+    'service_downtime' : Schedule downtime for 1 hour for service on host
+    'ack_host' : Acknowledge host problem on host
+    'services_down' : Return scheduled service downtimes for host
+    'del_service_downtime' : Delete scheduled downtime for service on host
+    'del_host_downtime' : Delete scheduled downtime for host
+    'hostcomments' : Return comments for host
+    'servicecomments' : Return comments for service on host
 
 To setup the bot, you can call Bot.new(:config => 'path to config file'). The config file is just a yamlized hash.
 
@@ -16,11 +22,11 @@ To setup the bot, you can call Bot.new(:config => 'path to config file'). The co
 
 Alternativly, these can be passed directly to the Bot.new command, bypassing the config file.
 
-This project uses a modified version of the ruby-nagios library. See http://code.google.com/p/ruby-nagios/
+This project uses a modified version of the ruby-nagios library. See http://code.google.com/p/ruby-nagios/ and https://github.com/ripienaar/ruby-nagios
 
 Once you clone this repo, you need to initialize the submodules
   cd nagios-jabber
   git submodule init
   git submodule update
-  
+
 This will clone the ruby-nagios repository.
