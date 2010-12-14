@@ -164,7 +164,7 @@ class Bot
           when 'hostcomments' then
             nagios.parsestatus(@status_log)
             status = nagios.status
-            if status['hosts'][host].key('hostcomments')
+            if status['hosts'][host].key?('hostcomments')
               comments = ''
               status['hosts'][host]['hostcomments'].each do |comment|
                 comments = comments + "[#{Time.at(comment['entry_time']).to_s}] #{comment['comment_data']}\n"
@@ -179,7 +179,7 @@ class Bot
           when 'servicecomments' then
             nagios.parsestatus(@status_log)
             status = nagios.status
-            if status['hosts'][host].key('servicecomments') && status['hosts'][host]['servicecomments'].key(service)
+            if status['hosts'][host].key?('servicecomments') && status['hosts'][host]['servicecomments'].key?(service)
               comments = ''
               status['hosts'][host]['servicecomments'][service].each do |comment|
                 comments = comments + "[#{Time.at(comment['entry_time']).to_s}] #{comment['comment_data']}\n"
@@ -213,14 +213,14 @@ class Bot
   end
 end
 
-orig_stdout = $stdout
-$stdout = File.new('/dev/null', 'w')
-pid = fork do
-  b = Bot.new(:botname => 'bot@jabber.thereisnoarizona.org', :host => 'jabber.thereisnoarizona.org', :password => 'j4bb3rb0t!', :status_log => '/var/cache/nagios3/status.dat', :cmd_file => '/var/lib/nagios3/rw/nagios.cmd')
-  b.run
-end
-::Process.detach pid
-$stdout = orig_stdout
-File.open('/var/run/nagios-jabber.pid', 'w') do |f|
-  f.puts pid
-end
+# orig_stdout = $stdout
+# $stdout = File.new('/dev/null', 'w')
+# pid = fork do
+#   b = Bot.new(:botname => 'bot@jabber.thereisnoarizona.org', :host => 'jabber.thereisnoarizona.org', :password => 'j4bb3rb0t!', :status_log => '/var/cache/nagios3/status.dat', :cmd_file => '/var/lib/nagios3/rw/nagios.cmd')
+#   b.run
+# end
+# ::Process.detach pid
+# $stdout = orig_stdout
+# File.open('/var/run/nagios-jabber.pid', 'w') do |f|
+#   f.puts pid
+# end
