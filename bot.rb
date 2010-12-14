@@ -61,9 +61,12 @@ class Bot
     @client.add_message_callback {|msg|
       command,host,service = msg.body.split(/,/)
       case command
+        ## Send back the roster list
         when 'roster' then 
           reply = @roster.items.keys.join("\n")
           send_msg(msg.from.to_s, "#{reply}", msg.type, msg.id)
+          
+        ## Schedule host downtime
         when 'host_downtime' then
           begin
             action = build_action('SCHEDULE_HOST_DOWNTIME', host, msg.from.to_s, host)
@@ -74,7 +77,8 @@ class Bot
           rescue Exception => e
             send_msg(msg.from.to_s, "#{e.message}", msg.type, msg.id)
           end
-          
+        
+        ## Schedule service downtime
         when 'service_downtime' then
           begin
             action = build_action('SCHEDULE_SVC_DOWNTIME', "#{host};#{service}", msg.from.to_s, host)
@@ -85,6 +89,8 @@ class Bot
           rescue Exception => e
             send_msg(msg.from.to_s, "#{e.message}", msg.type, msg.id)
           end
+        
+        ## Acknowledge host problem
         when 'ack_host' then
           begin
             nagios.parsestatus(@status_log)
@@ -97,6 +103,8 @@ class Bot
           rescue Exception => e
             send_msg(msg.from.to_s, "#{e.message}", msg.type, msg.id)
           end
+        
+        ## List services with scheduled downtime
         when 'services_down' then
           begin
             nagios.parsestatus(@status_log)
@@ -113,6 +121,8 @@ class Bot
           rescue Exception => e
             send_msg(msg.from.to_s, "#{e.message}", msg.type, msg.id)            
           end
+        
+        ## Delete scheduled service downtime
         when 'del_service_downtime' then
           begin
             nagios.parsestatus(@status_log)
@@ -128,6 +138,8 @@ class Bot
           rescue Exception => e
             send_msg(msg.from.to_s, "#{e.message}", msg.type, msg.id)
           end
+          
+         ## Delete scheduled host downtime
          when 'del_host_downtime' then
            begin
             nagios.parsestatus(@status_log)
@@ -142,9 +154,35 @@ class Bot
            rescue Exception => e
             send_msg(msg.from.to_s, "#{e.message}", msg.type, msg.id)
            end
+          
+          ## List commands (incomplete)
           when 'commands' then
             reply = "roster, host_downtime, service_downtime, del_host_downtime, del_svc_downtime, commands"
             send_msg(msg.from.to_s, "#{reply}", msg.type, msg.id)
+          
+          ## List current host comments
+          when 'hostcomments' then
+            nagios.parsestatus(@status_log)
+            status = nagios.status
+            if status['hosts'][host]['hostcomments']
+              comments = status['hosts'][host]['hostcomments'].join("\n")
+              reply = "#{host} has the following comments\n#{comments}"
+              send_msg(msg.from.to_s, "#{reply}", msg.type, msg.id)
+            else
+              send_msg(msg.from.to_s,"#{host} has no comments", msg.type, msg.id)
+            end
+          
+          ## List current service comments for service
+          when 'servicecomments' then
+            nagios.parsestatus(@status_log)
+            status = nagios.status
+            if status['hosts'][host]['servicecomments'][service]
+              comments = status['hosts'][host]['servicecomments'][service].join("\n")
+              reply = "#{service} on #{host} has the following comments\n#{comments}"
+              send_msg(msg.from.to_s, "#{reply}", msg.type, msg.id)
+            else
+              send_msg(msg.from.to_s, "#{service} on #{host} has no comments", msg.type, msg.id)
+            end
       end
     }
   end
