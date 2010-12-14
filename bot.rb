@@ -162,33 +162,42 @@ class Bot
           
           ## List current host comments
           when 'hostcomments' then
-            nagios.parsestatus(@status_log)
-            status = nagios.status
-            if status['hosts'][host].key?('hostcomments')
-              comments = ''
-              status['hosts'][host]['hostcomments'].each do |comment|
-                comments = comments + "[#{Time.at(comment['entry_time'].to_i).to_s}] #{comment['comment_data']}\n"
+            begin
+              nagios.parsestatus(@status_log)
+              status = nagios.status
+              if status['hosts'][host].key?('hostcomments')
+                comments = ''
+                status['hosts'][host]['hostcomments'].each do |comment|
+                  comments = comments + "[#{Time.at(comment['entry_time'].to_i).to_s}] #{comment['comment_data']}\n"
+                end
+                reply = "#{host} has the following comments\n#{comments}"
+                send_msg(msg.from.to_s, "#{reply}", msg.type, msg.id)
+              else
+                send_msg(msg.from.to_s,"#{host} has no comments", msg.type, msg.id)
               end
-              reply = "#{host} has the following comments\n#{comments}"
-              send_msg(msg.from.to_s, "#{reply}", msg.type, msg.id)
-            else
-              send_msg(msg.from.to_s,"#{host} has no comments", msg.type, msg.id)
+            rescue Exception => e
+              send_msg(msg.from.to_s, "#{e.message}", msg.type, msg.id)
             end
-          
           ## List current service comments for service
           when 'servicecomments' then
-            nagios.parsestatus(@status_log)
-            status = nagios.status
-            if status['hosts'][host].key?('servicecomments') && status['hosts'][host]['servicecomments'].key?(service)
-              comments = ''
-              status['hosts'][host]['servicecomments'][service].each do |comment|
-                comments = comments + "[#{Time.at(comment['entry_time'].to_i).to_s}] #{comment['comment_data']}\n"
+            begin
+              nagios.parsestatus(@status_log)
+              status = nagios.status
+              if status['hosts'][host].key?('servicecomments') && status['hosts'][host]['servicecomments'].key?(service)
+                comments = ''
+                status['hosts'][host]['servicecomments'][service].each do |comment|
+                  comments = comments + "[#{Time.at(comment['entry_time'].to_i).to_s}] #{comment['comment_data']}\n"
+                end
+                reply = "#{service} on #{host} has the following comments\n#{comments}"
+                send_msg(msg.from.to_s, "#{reply}", msg.type, msg.id)
+              else
+                send_msg(msg.from.to_s, "#{service} on #{host} has no comments", msg.type, msg.id)
               end
-              reply = "#{service} on #{host} has the following comments\n#{comments}"
-              send_msg(msg.from.to_s, "#{reply}", msg.type, msg.id)
-            else
-              send_msg(msg.from.to_s, "#{service} on #{host} has no comments", msg.type, msg.id)
+            rescue Exception => e
+              send_msg(msg.from.to_s, "#{e.message}", msg.type, msg.id)
             end
+          else
+            send_msg(msg.from.to_s, "#{command} is not supported", msg.type, msg.id)
       end
     }
   end
@@ -213,14 +222,14 @@ class Bot
   end
 end
 
-# orig_stdout = $stdout
-# $stdout = File.new('/dev/null', 'w')
-# pid = fork do
-#   b = Bot.new(:botname => 'bot@jabber.thereisnoarizona.org', :host => 'jabber.thereisnoarizona.org', :password => 'j4bb3rb0t!', :status_log => '/var/cache/nagios3/status.dat', :cmd_file => '/var/lib/nagios3/rw/nagios.cmd')
-#   b.run
-# end
-# ::Process.detach pid
-# $stdout = orig_stdout
-# File.open('/var/run/nagios-jabber.pid', 'w') do |f|
-#   f.puts pid
-# end
+orig_stdout = $stdout
+$stdout = File.new('/dev/null', 'w')
+pid = fork do
+  b = Bot.new(:botname => 'bot@jabber.thereisnoarizona.org', :host => 'jabber.thereisnoarizona.org', :password => 'j4bb3rb0t!', :status_log => '/var/cache/nagios3/status.dat', :cmd_file => '/var/lib/nagios3/rw/nagios.cmd')
+  b.run
+end
+::Process.detach pid
+$stdout = orig_stdout
+File.open('/var/run/nagios-jabber.pid', 'w') do |f|
+  f.puts pid
+end
