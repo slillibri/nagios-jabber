@@ -4,7 +4,7 @@ require 'rubygems'
 require 'eventmachine'
 require 'xmpp4r'
 require 'xmpp4r/roster'
-require 'nagios/status.rb'
+require 'ruby-nagios/nagios/status.rb'
 
 class Bot
   include Jabber
