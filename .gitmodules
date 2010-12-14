@@ -1,0 +1,3 @@
+[submodule "ruby-nagios"]
+	path = ruby-nagios
+	url = git://github.com/slillibri/ruby-nagios.git
