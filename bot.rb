@@ -167,7 +167,7 @@ class Bot
             if status['hosts'][host].key?('hostcomments')
               comments = ''
               status['hosts'][host]['hostcomments'].each do |comment|
-                comments = comments + "[#{Time.at(comment['entry_time']).to_s}] #{comment['comment_data']}\n"
+                comments = comments + "[#{Time.at(comment['entry_time'].to_i).to_s}] #{comment['comment_data']}\n"
               end
               reply = "#{host} has the following comments\n#{comments}"
               send_msg(msg.from.to_s, "#{reply}", msg.type, msg.id)
@@ -182,7 +182,7 @@ class Bot
             if status['hosts'][host].key?('servicecomments') && status['hosts'][host]['servicecomments'].key?(service)
               comments = ''
               status['hosts'][host]['servicecomments'][service].each do |comment|
-                comments = comments + "[#{Time.at(comment['entry_time']).to_s}] #{comment['comment_data']}\n"
+                comments = comments + "[#{Time.at(comment['entry_time'].to_i).to_s}] #{comment['comment_data']}\n"
               end
               reply = "#{service} on #{host} has the following comments\n#{comments}"
               send_msg(msg.from.to_s, "#{reply}", msg.type, msg.id)
