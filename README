@@ -17,3 +17,10 @@ To setup the bot, you can call Bot.new(:config => 'path to config file'). The co
 Alternativly, these can be passed directly to the Bot.new command, bypassing the config file.
 
 This project uses a modified version of the ruby-nagios library. See http://code.google.com/p/ruby-nagios/
+
+Once you clone this repo, you need to initialize the submodules
+  cd nagios-jabber
+  git submodule init
+  git submodule update
+  
+This will clone the ruby-nagios repository.
